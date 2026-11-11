@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Koding & AI - Berpikir Komputasional SMP Kelas 7</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Plus Jakarta Sans (Ramah Anak & Modern) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti CDN untuk Efek Kemenangan Kuis/Game -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cyber-blue': '#00d2ff',
+                        'cyber-purple': '#8000ff',
+                        'cyber-pink': '#ff007f',
+                        'neon-yellow': '#ffe600',
+                        'kids-green': '#10b981'
+                    },
+                    fontFamily: {
+                        heading: ['Fredoka', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 4s ease-in-out infinite',
+                        'bounce-slow': 'bounce 2.5s infinite',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'spin-slow': 'spin 12s linear infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { filter: 'drop-shadow(0 0 10px rgba(0,210,255,0.6))' },
+                            '50%': { filter: 'drop-shadow(0 0 25px rgba(255,0,127,0.8))' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CSS Tambahan Custom & Kerapihan Drag & Drop */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Glassmorphism Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(90deg, #00d2ff, #ff007f, #ffe600);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Drag and Drop Zone Highlighting */
+        .drag-over {
+            border-color: #00d2ff !important;
+            background-color: rgba(0, 210, 255, 0.2) !important;
+            transform: scale(1.02);
+        }
+
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8000ff;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff007f;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between overflow-x-hidden">
+
+    <!-- HEADER & NAVIGASI SPA -->
+    <header class="sticky top-0 z-50 glass-card border-b border-white/10 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <!-- Logo & Brand -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyber-blue to-cyber-pink flex items-center justify-center shadow-lg animate-pulse-glow">
+                    <i class="fa-solid font-bold fa-robot text-2xl text-white animate-bounce-slow"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold gradient-text tracking-wide">KODING & AI KIDS</h1>
+                    <p class="text-xs text-cyan-300 font-medium">Berpikir Komputasional • SMP Kelas 7</p>
+                </div>
+            </div>
+
+            <!-- Navigasi Menu (Tab System) -->
+            <nav class="flex flex-wrap items-center gap-2 bg-slate-900/60 p-1.5 rounded-2xl border border-white/10 text-sm md:text-base">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-btn active flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-heading font-semibold bg-gradient-to-r from-cyber-blue to-blue-600 text-white shadow-md">
+                    <i class="fa-solid fa-house"></i> Home
+                </button>
+                <button onclick="switchTab('tujuan')" id="nav-tujuan" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-heading font-semibold text-slate-300 hover:text-white hover:bg-white/10">
+                    <i class="fa-solid fa-bullseye"></i> Tujuan
+                </button>
+                <button onclick="switchTab('materi')" id="nav-materi" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-heading font-semibold text-slate-300 hover:text-white hover:bg-white/10">
+                    <i class="fa-solid fa-book-open"></i> Materi
+                </button>
+                <button onclick="switchTab('kuis')" id="nav-kuis" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-heading font-semibold text-slate-300 hover:text-white hover:bg-white/10">
+                    <i class="fa-solid fa-gamepad"></i> Kuis Interaktif
+                </button>
+                <button onclick="switchTab('dragdrop')" id="nav-dragdrop" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-heading font-semibold text-slate-300 hover:text-white hover:bg-white/10">
+                    <i class="fa-solid fa-puzzle-piece"></i> Permainan AI
+                </button>
+                <button onclick="switchTab('tentang')" id="nav-tentang" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-heading font-semibold text-slate-300 hover:text-white hover:bg-white/10">
+                    <i class="fa-solid fa-user-gear"></i> Tentang
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- KONTEN UTAMA (SPA CONTAINER) -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- ================= BAGIAN 1: HOME ================= -->
+        <section id="sec-home" class="tab-content block space-y-12">
+            <!-- Hero Banner -->
+            <div class="glass-card rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 border-2 border-cyan-500/30">
+                <!-- Background Ornaments -->
+                <div class="absolute -top-10 -right-10 w-48 h-48 bg-cyber-purple/30 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-cyber-pink/30 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex-1 space-y-6 text-center md:text-left z-10">
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/20 text-cyber-blue font-bold text-sm border border-cyan-500/30 animate-pulse">
+                        🚀 Media Pembelajaran Digital Masa Depan
+                    </span>
+                    <h2 class="text-4xl md:text-6xl font-extrabold leading-tight">
+                        Jadi Pahlawan Digital dengan <span class="gradient-text">Berpikir Komputasional!</span>
+                    </h2>
+                    <p class="text-slate-300 text-lg md:text-xl leading-relaxed">
+                        Halo Sahabat Hebat! Selamat datang di dunia Koding dan Kecerdasan Artifisial (AI). Mari belajar cara memecahkan masalah rumit dengan cara yang seru, mudah, dan menyenangkan!
+                    </p>
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-start pt-2">
+                        <button onclick="switchTab('materi')" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyber-blue via-indigo-600 to-cyber-purple text-white font-heading font-bold text-lg shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all flex items-center gap-3">
+                            <i class="fa-solid fa-rocket"></i> Mulai Petualangan
+                        </button>
+                        <button onclick="switchTab('dragdrop')" class="px-8 py-4 rounded-2xl glass-card text-neon-yellow border border-yellow-400/30 font-heading font-bold text-lg hover:bg-yellow-400/10 hover:scale-105 transition-all flex items-center gap-3">
+                            <i class="fa-solid fa-gamepad"></i> Coba Lab AI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Robot Mascot Mascot Animated -->
+                <div class="flex-1 flex justify-center z-10">
+                    <div class="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
+                        <div class="absolute inset-0 border-4 border-dashed border-cyan-400/40 rounded-full animate-spin-slow"></div>
+                        <div class="w-56 h-56 md:w-72 md:h-72 bg-gradient-to-tr from-purple-600 to-pink-500 rounded-full flex items-center justify-center shadow-2xl animate-float">
+                            <i class="fa-solid fa-robot text-8xl md:text-9xl text-white drop-shadow-lg"></i>
+                        </div>
+                        <div class="absolute bottom-2 right-2 bg-slate-900 border border-white/20 px-4 py-2 rounded-xl text-xs font-bold text-cyan-300 animate-bounce">
+                            🤖 Robo-AI: "Halo Teman!"
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Highlights Features Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 rounded-2xl hover:scale-105 transition-all border-l-4 border-cyber-blue">
+                    <div class="w-14 h-14 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyber-blue text-3xl mb-4">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">4 Pilar Komputasional</h3>
+                    <p class="text-slate-300 text-sm">Pahami Dekomposisi, Pengenalan Pola, Abstraksi, dan Algoritma secara visual & ringkas.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl hover:scale-105 transition-all border-l-4 border-cyber-pink">
+                    <div class="w-14 h-14 rounded-xl bg-pink-500/20 flex items-center justify-center text-cyber-pink text-3xl mb-4">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Lab Deteksi AI</h3>
+                    <p class="text-slate-300 text-sm">Simulasi interaktif cara Kecerdasan Artifisial mengenali data gambar dan belajar!</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl hover:scale-105 transition-all border-l-4 border-neon-yellow">
+                    <div class="w-14 h-14 rounded-xl bg-yellow-500/20 flex items-center justify-center text-neon-yellow text-3xl mb-4">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Kuis & Badge Hadiah</h3>
+                    <p class="text-slate-300 text-sm">Uji kemampuanmu, kumpulkan nilai sempurna dan dapatkan Lencana Super AI Master!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 2: TUJUAN PEMBELAJARAN ================= -->
+        <section id="sec-tujuan" class="tab-content hidden space-y-8">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-5xl font-bold gradient-text">Tujuan Pembelajaran</h2>
+                <p class="text-slate-300 max-w-2xl mx-auto">Capaian Pembelajaran Informatika / IPAS Fase D (Kelas 7 SMP)</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1 -->
+                <div class="glass-card p-6 rounded-3xl flex items-start gap-5 border border-cyan-500/20 hover:bg-white/10 transition">
+                    <div class="w-14 h-14 shrink-0 rounded-2xl bg-cyan-500/20 text-cyber-blue font-heading font-bold text-2xl flex items-center justify-center">
+                        01
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-bold text-cyan-300">Memahami Berpikir Komputasional</h3>
+                        <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                            Siswa mampu menjelaskan 4 pilar Berpikir Komputasional (Dekomposisi, Pengenalan Pola, Abstraksi, Algoritma) untuk memecahkan masalah sehari-hari.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card p-6 rounded-3xl flex items-start gap-5 border border-purple-500/20 hover:bg-white/10 transition">
+                    <div class="w-14 h-14 shrink-0 rounded-2xl bg-purple-500/20 text-purple-400 font-heading font-bold text-2xl flex items-center justify-center">
+                        02
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-bold text-purple-300">Konsep Dasar AI & Koding</h3>
+                        <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                            Siswa dapat mengenali bagaimana komputer dan Kecerdasan Artifisial (AI) belajar dari data serta mengikuti urutan instruksi (algoritma).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card p-6 rounded-3xl flex items-start gap-5 border border-pink-500/20 hover:bg-white/10 transition">
+                    <div class="w-14 h-14 shrink-0 rounded-2xl bg-pink-500/20 text-pink-400 font-heading font-bold text-2xl flex items-center justify-center">
+                        03
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-bold text-pink-300">Simulasi Pembelajaran Mesin</h3>
+                        <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                            Siswa mampu mempraktikkan proses klasifikasi data sederhana pada simulasi AI *Drag and Drop* secara logis dan sistematis.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-card p-6 rounded-3xl flex items-start gap-5 border border-yellow-500/20 hover:bg-white/10 transition">
+                    <div class="w-14 h-14 shrink-0 rounded-2xl bg-yellow-500/20 text-yellow-400 font-heading font-bold text-2xl flex items-center justify-center">
+                        04
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-bold text-yellow-300">Kreativitas & Problem Solving</h3>
+                        <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                            Menumbuhkan rasa ingin tahu, bernalar kritis, dan kreatif dalam memanfaatkan teknologi komputasi secara positif.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Alur Belajar -->
+            <div class="glass-card p-6 rounded-3xl text-center border border-white/10 space-y-4">
+                <h3 class="text-2xl font-bold text-white">Target Alur Pembelajaran Hari Ini</h3>
+                <div class="flex flex-wrap justify-center items-center gap-4 text-sm font-semibold">
+                    <span class="px-4 py-2 rounded-xl bg-slate-800 text-cyan-400 border border-cyan-500/30">1. Baca Materi</span>
+                    <i class="fa-solid fa-arrow-right text-slate-500 hidden sm:inline"></i>
+                    <span class="px-4 py-2 rounded-xl bg-slate-800 text-purple-400 border border-purple-500/30">2. Coba Lab AI</span>
+                    <i class="fa-solid fa-arrow-right text-slate-500 hidden sm:inline"></i>
+                    <span class="px-4 py-2 rounded-xl bg-slate-800 text-pink-400 border border-pink-500/30">3. Selesaikan Kuis</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 3: MATERI PEMBELAJARAN ================= -->
+        <section id="sec-materi" class="tab-content hidden space-y-10">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-5xl font-bold gradient-text">Materi: Koding & AI</h2>
+                <p class="text-slate-300">Pelajari 4 Langkah Ajaib Berpikir Komputasional!</p>
+            </div>
+
+            <!-- Interactive Pillar Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- Pilar 1: Dekomposisi -->
+                <div class="glass-card p-6 rounded-3xl border-t-4 border-cyber-blue space-y-4 relative overflow-hidden">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center text-cyber-blue text-3xl">
+                            <i class="fa-solid fa-puzzle-piece"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-cyan-400 font-bold uppercase tracking-wider">Pilar 1</span>
+                            <h3 class="text-2xl font-bold text-white">Dekomposisi</h3>
+                        </div>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">
+                        <strong>Dekomposisi</strong> adalah memecah masalah besar yang rumit menjadi bagian-bagian kecil yang lebih mudah diselesaikan.
+                    </p>
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-white/5 space-y-2">
+                        <p class="text-xs text-cyan-300 font-bold"><i class="fa-solid fa-lightbulb"></i> Contoh Sehari-hari:</p>
+                        <p class="text-sm text-slate-300">Ingin membuat Robot Sepeda? Pecah jadi bagian: Roda, Stang, Rantai, dan Mesin Sensor!</p>
+                    </div>
+                </div>
+
+                <!-- Pilar 2: Pengenalan Pola -->
+                <div class="glass-card p-6 rounded-3xl border-t-4 border-cyber-purple space-y-4 relative overflow-hidden">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-400 text-3xl">
+                            <i class="fa-solid fa-shapes"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-purple-400 font-bold uppercase tracking-wider">Pilar 2</span>
+                            <h3 class="text-2xl font-bold text-white">Pengenalan Pola</h3>
+                        </div>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">
+                        Mencari kesamaan atau kemiripan bentuk, sifat, dan kebiasaan dari masalah-masalah yang pernah kita temui.
+                    </p>
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-white/5 space-y-2">
+                        <p class="text-xs text-purple-300 font-bold"><i class="fa-solid fa-lightbulb"></i> Contoh Sehari-hari:</p>
+                        <p class="text-sm text-slate-300">Kucing dan Harimau sama-sama berkaki empat, berbulu, dan memiliki taring. Itu adalah Pola!</p>
+                    </div>
+                </div>
+
+                <!-- Pilar 3: Abstraksi -->
+                <div class="glass-card p-6 rounded-3xl border-t-4 border-cyber-pink space-y-4 relative overflow-hidden">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl bg-pink-500/20 flex items-center justify-center text-cyber-pink text-3xl">
+                            <i class="fa-solid fa-filter"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-pink-400 font-bold uppercase tracking-wider">Pilar 3</span>
+                            <h3 class="text-2xl font-bold text-white">Abstraksi</h3>
+                        </div>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">
+                        Fokus HANYA pada informasi yang penting saja dan mengabaikan detail rumit yang tidak dibutuhkan.
+                    </p>
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-white/5 space-y-2">
+                        <p class="text-xs text-pink-300 font-bold"><i class="fa-solid fa-lightbulb"></i> Contoh Sehari-hari:</p>
+                        <p class="text-sm text-slate-300">Saat membaca peta Google Maps, kita fokus pada rute jalan, bukan warna cat rumah orang di pinggir jalan!</p>
+                    </div>
+                </div>
+
+                <!-- Pilar 4: Algoritma -->
+                <div class="glass-card p-6 rounded-3xl border-t-4 border-neon-yellow space-y-4 relative overflow-hidden">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl bg-yellow-500/20 flex items-center justify-center text-neon-yellow text-3xl">
+                            <i class="fa-solid fa-list-ol"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-yellow-400 font-bold uppercase tracking-wider">Pilar 4</span>
+                            <h3 class="text-2xl font-bold text-white">Algoritma (Koding)</h3>
+                        </div>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">
+                        Menyusun langkah-langkah petunjuk secara berurutan, jelas, dan logis dari awal sampai akhir untuk menyelesaikan tugas.
+                    </p>
+                    <div class="bg-slate-900/70 p-4 rounded-2xl border border-white/5 space-y-2">
+                        <p class="text-xs text-yellow-300 font-bold"><i class="fa-solid fa-lightbulb"></i> Contoh Sehari-hari:</p>
+                        <p class="text-sm text-slate-300">Resep membuat Mie Goreng: 1. Rebus air, 2. Masukkan mie, 3. Tuang bumbu, 4. Aduk rata!</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sub-Materi Kecerdasan Artifisial (AI) -->
+            <div class="glass-card p-8 rounded-3xl border border-cyan-500/30 space-y-6">
+                <div class="flex items-center gap-4">
+                    <i class="fa-solid fa-brain text-4xl text-cyber-blue"></i>
+                    <div>
+                        <h3 class="text-2xl font-bold">Bagaimana Kecerdasan Artifisial (AI) Belajar?</h3>
+                        <p class="text-slate-400 text-sm">Pembelajaran Mesin (Machine Learning)</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-white/10 space-y-3">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-blue-500/20 flex items-center justify-center text-cyber-blue text-xl">1</div>
+                        <h4 class="font-bold text-white">Data Input</h4>
+                        <p class="text-xs text-slate-300">AI diberi ribuan contoh foto hewan, suara, atau teks sebagai bahan belajar.</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-white/10 space-y-3">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-xl">2</div>
+                        <h4 class="font-bold text-white">Proses Latihan (Training)</h4>
+                        <p class="text-xs text-slate-300">AI menggunakan *Pengenalan Pola* untuk mengingat mana foto Kucing dan mana Anjing.</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-white/10 space-y-3">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400 text-xl">3</div>
+                        <h4 class="font-bold text-white">Prediksi Pintar</h4>
+                        <p class="text-xs text-slate-300">Ketika diberi foto baru, AI bisa menebak dengan akurat: "Ini pasti Kucing!"</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 4: KUIS INTERAKTIF ================= -->
+        <section id="sec-kuis" class="tab-content hidden space-y-8">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-5xl font-bold gradient-text">Kuis Detektif AI</h2>
+                <p class="text-slate-300">Uji pengetahuanmu dan kumpulkan poin tertinggi!</p>
+            </div>
+
+            <!-- Quiz Container -->
+            <div class="max-w-3xl mx-auto glass-card rounded-3xl p-6 md:p-10 border border-purple-500/30 relative">
+                
+                <!-- Progress Bar & Score Board -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
+                    <div class="text-sm font-bold text-cyan-300" id="quiz-progress-text">Soal 1 dari 5</div>
+                    <div class="flex items-center gap-2 bg-yellow-500/20 px-4 py-1.5 rounded-full border border-yellow-400/30">
+                        <i class="fa-solid fa-star text-neon-yellow"></i>
+                        <span class="font-bold text-white text-sm" id="quiz-score">Skor: 0</span>
+                    </div>
+                </div>
+
+                <!-- Active Question Box -->
+                <div id="quiz-box" class="space-y-6">
+                    <h3 id="quiz-question" class="text-xl md:text-2xl font-bold text-white leading-relaxed">
+                        Loading pertanyaan...
+                    </h3>
+
+                    <!-- Options Buttons -->
+                    <div id="quiz-options" class="grid grid-cols-1 gap-4">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <!-- Feedback Alert -->
+                    <div id="quiz-feedback" class="hidden p-4 rounded-2xl font-bold text-center text-sm md:text-base animate-pulse">
+                    </div>
+
+                    <!-- Next Button -->
+                    <div class="flex justify-end pt-4">
+                        <button id="btn-next-quiz" onclick="nextQuestion()" class="hidden px-6 py-3 rounded-xl bg-gradient-to-r from-cyber-blue to-purple-600 text-white font-heading font-bold hover:scale-105 transition">
+                            Pertanyaan Selanjutnya <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Result Screen (Hidden by default) -->
+                <div id="quiz-result" class="hidden text-center space-y-6 py-6">
+                    <div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-yellow-400 to-pink-500 flex items-center justify-center shadow-lg animate-bounce">
+                        <i class="fa-solid fa-trophy text-5xl text-white"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold text-white">Hore! Kuis Selesai!</h3>
+                    <p class="text-lg text-slate-300">Skor Akhir Kamu:</p>
+                    <div class="text-6xl font-black gradient-text" id="final-score">100</div>
+                    
+                    <div id="badge-container" class="p-4 rounded-2xl bg-slate-900/80 border border-white/10 max-w-sm mx-auto">
+                        <p class="text-xs text-slate-400 mb-1">Lencana Yang Didapat:</p>
+                        <h4 id="badge-title" class="text-xl font-bold text-neon-yellow">🏆 Master Computations</h4>
+                    </div>
+
+                    <button onclick="restartQuiz()" class="px-8 py-3.5 rounded-2xl bg-cyber-purple hover:bg-cyber-pink text-white font-bold transition transform hover:scale-105">
+                        <i class="fa-solid fa-rotate-right"></i> Ulangi Kuis
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 5: DRAG AND DROP LAB AI ================= -->
+        <section id="sec-dragdrop" class="tab-content hidden space-y-8">
+            <div class="text-center space-y-3">
+                <h2 class="text-3xl md:text-5xl font-bold gradient-text">Lab AI: Sortir Sampah Digital</h2>
+                <p class="text-slate-300">Bantu Kamera AI melatih mesin memilah Sampah Organik & Anorganik!</p>
+            </div>
+
+            <!-- Game Board Container -->
+            <div class="glass-card p-6 md:p-8 rounded-3xl border border-cyan-500/30 space-y-8">
+                
+                <!-- Draggable Items Pool -->
+                <div class="bg-slate-900/80 p-6 rounded-2xl border border-white/10">
+                    <h3 class="text-sm font-bold text-cyan-300 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-pointer animate-bounce"></i> Seret (Drag) Objek di bawah ini ke Kotak AI yang Tepat:
+                    </h3>
+                    
+                    <div id="items-pool" class="flex flex-wrap justify-center gap-4 min-h-[90px] p-2">
+                        <!-- Items Draggable -->
+                        <div draggable="true" ondragstart="drag(event)" id="item-1" data-category="organik" class="draggable-item bg-emerald-600/30 border border-emerald-400/50 hover:bg-emerald-600/50 text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-3 transition">
+                            <i class="fa-solid fa-apple-whole text-emerald-400 text-2xl"></i> Sisa Apel
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="item-2" data-category="anorganik" class="draggable-item bg-blue-600/30 border border-blue-400/50 hover:bg-blue-600/50 text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-3 transition">
+                            <i class="fa-solid fa-bottle-water text-blue-400 text-2xl"></i> Botol Plastik
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="item-3" data-category="organik" class="draggable-item bg-emerald-600/30 border border-emerald-400/50 hover:bg-emerald-600/50 text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-3 transition">
+                            <i class="fa-solid fa-leaf text-emerald-400 text-2xl"></i> Daun Kering
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="item-4" data-category="anorganik" class="draggable-item bg-blue-600/30 border border-blue-400/50 hover:bg-blue-600/50 text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-3 transition">
+                            <i class="fa-solid fa-box text-blue-400 text-2xl"></i> Kaleng Minuman
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="item-5" data-category="organik" class="draggable-item bg-emerald-600/30 border border-emerald-400/50 hover:bg-emerald-600/50 text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-3 transition">
+                            <i class="fa-solid fa-fish text-emerald-400 text-2xl"></i> Duri Ikan
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="item-6" data-category="anorganik" class="draggable-item bg-blue-600/30 border border-blue-400/50 hover:bg-blue-600/50 text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-3 transition">
+                            <i class="fa-solid fa-plug text-blue-400 text-2xl"></i> Kabel Bekas
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Drop Zones -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Zone 1: Organik -->
+                    <div ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'organik')" class="drop-zone border-2 border-dashed border-emerald-500/50 bg-emerald-950/20 rounded-3xl p-6 min-h-[220px] flex flex-col items-center justify-start gap-3 transition">
+                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-xl">
+                            <i class="fa-solid fa-seedling"></i> Kategori: Sampah Organik
+                        </div>
+                        <p class="text-xs text-slate-400 text-center">Sampah alami yang mudah membusuk/terurai</p>
+                        <div class="dropped-container w-full flex flex-wrap gap-2 justify-center mt-2"></div>
+                    </div>
+
+                    <!-- Zone 2: Anorganik -->
+                    <div ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'anorganik')" class="drop-zone border-2 border-dashed border-blue-500/50 bg-blue-950/20 rounded-3xl p-6 min-h-[220px] flex flex-col items-center justify-start gap-3 transition">
+                        <div class="flex items-center gap-2 text-blue-400 font-bold text-xl">
+                            <i class="fa-solid fa-recycle"></i> Kategori: Sampah Anorganik
+                        </div>
+                        <p class="text-xs text-slate-400 text-center">Sampah buatan/plastik yang sulit terurai</p>
+                        <div class="dropped-container w-full flex flex-wrap gap-2 justify-center mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Status Feedback & Reset -->
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+                    <div id="game-status" class="text-sm font-bold text-cyan-300">
+                        🤖 AI Sensor Status: Menunggu klasifikasi data...
+                    </div>
+                    <button onclick="resetDragGame()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm border border-white/10 transition">
+                        <i class="fa-solid fa-rotate-left"></i> Reset Permainan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 6: TENTANG (ABOUT DEVELOPER) ================= -->
+        <section id="sec-tentang" class="tab-content hidden space-y-8">
+            <div class="max-w-4xl mx-auto glass-card rounded-3xl p-8 md:p-12 border border-cyan-500/30 text-center space-y-6 relative overflow-hidden">
+                <!-- Decorative Light -->
+                <div class="absolute -top-20 -left-20 w-40 h-40 bg-cyber-blue/20 rounded-full blur-3xl"></div>
+
+                <!-- Developer Avatar / Icon -->
+                <div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-tr from-cyber-blue via-indigo-500 to-cyber-pink p-1.5 shadow-2xl">
+                    <div class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center overflow-hidden">
+                        <i class="fa-solid fa-user-tie text-6xl text-cyan-300"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="px-4 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold uppercase tracking-wider">Pengembang Media Pembelajaran</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Faisal Ridwan, S.Pd.</h2>
+                    <p class="text-cyber-pink font-semibold">Guru Komputer & Pembelajaran Digital</p>
+                </div>
+
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed max-w-2xl mx-auto">
+                    Aplikasi Web Media Pembelajaran Interaktif ini dirancang khusus untuk memfasilitasi pembelajaran <strong>Informatika & IPAS (Berpikir Komputasional)</strong> tingkat SMP Kelas 7. Bertujuan membangun kecerdasan digital, logika berpikir sistematis, dan pemahaman dasar AI sejak dini dengan cara yang interaktif.
+                </p>
+
+                <!-- Information Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left pt-4">
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-white/5 space-y-1">
+                        <p class="text-xs text-slate-400">Sasaran Pengguna</p>
+                        <p class="text-sm font-bold text-white">Siswa SMP Kelas 7 (Fase D)</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-white/5 space-y-1">
+                        <p class="text-xs text-slate-400">Teknologi Web</p>
+                        <p class="text-sm font-bold text-white">HTML5, Tailwind CSS, JS</p>
+                    </div>
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-white/5 space-y-1">
+                        <p class="text-xs text-slate-400">Metode Pembelajaran</p>
+                        <p class="text-sm font-bold text-white">Gamifikasi & Visual Interaktif</p>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/10 text-xs text-slate-400">
+                    © 2026 Media Pembelajaran Koding & AI • Hak Cipta Dilindungi
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER Halaman -->
+    <footer class="glass-card border-t border-white/10 py-4 px-4 text-center text-xs text-slate-400">
+        <p>Dikembangkan oleh <span class="text-cyan-300 font-bold">Faisal Ridwan</span> | Media Pembelajaran Berpikir Komputasional & AI SMP Kelas 7</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC (Single Page Application, Kuis, Drag & Drop) -->
+    <script>
+        /* ===================================================
+           1. SISTEM NAVIGASI TAB (SINGLE PAGE APPLICATION)
+           =================================================== */
+        function switchTab(tabId) {
+            // Sembunyikan semua konten tab
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+            });
+
+            // Tampilkan tab yang dipilih
+            const activeContent = document.getElementById('sec-' + tabId);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+                activeContent.classList.add('block');
+            }
+
+            // Update style tombol navigasi
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-gradient-to-r', 'from-cyber-blue', 'to-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-white/10');
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-gradient-to-r', 'from-cyber-blue', 'to-blue-600', 'text-white', 'shadow-md');
+                activeBtn.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-white/10');
+            }
+
+            // Scroll ke atas dengan halus
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+
+        /* ===================================================
+           2. LOGIKA KUIS INTERAKTIF
+           =================================================== */
+        const quizData = [
+            {
+                question: "Apa yang dimaksud dengan Dekomposisi dalam Berpikir Komputasional?",
+                options: [
+                    "Membuat program komputer yang sangat panjang",
+                    "Memecah masalah besar menjadi bagian-bagian kecil yang lebih sederhana",
+                    "Menebak hasil akhir tanpa berpikir",
+                    "Menghapus semua file sampah di komputer"
+                ],
+                answer: 1
+            },
+            {
+                question: "Saat kamu melihat bahwa Kucing dan Harimau sama-sama memiliki taring dan kumis, pilar apa yang sedang kamu gunakan?",
+                options: [
+                    "Pengenalan Pola (Pattern Recognition)",
+                    "Dekomposisi",
+                    "Algoritma",
+                    "Format Komputer"
+                ],
+                answer: 0
+            },
+            {
+                question: "Fokus hanya pada informasi penting dan mengabaikan detail yang tidak perlu disebut...",
+                options: [
+                    "Dekomposisi",
+                    "Algoritma",
+                    "Abstraksi",
+                    "Koding"
+                ],
+                answer: 2
+            },
+            {
+                question: "Urutan langkah-langkah logis dan sistematis untuk menyelesaikan suatu masalah disebut...",
+                options: [
+                    "Algoritma",
+                    "Database",
+                    "Hardware",
+                    "Abstraksi"
+                ],
+                answer: 0
+            },
+            {
+                question: "Bagaimana cara Kecerdasan Artifisial (AI) belajar mengenali benda baru?",
+                options: [
+                    "Dengan membaca pikiran manusia",
+                    "Melatih diri menggunakan banyak Data Input",
+                    "Secara otomatis tanpa belajar",
+                    "Mengganti baterai komputer"
+                ],
+                answer: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const currentQuiz = quizData[currentQuestionIndex];
+            document.getElementById('quiz-progress-text').innerText = `Soal ${currentQuestionIndex + 1} dari ${quizData.length}`;
+            document.getElementById('quiz-question').innerText = currentQuiz.question;
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.add('hidden');
+            document.getElementById('btn-next-quiz').classList.add('hidden');
+
+            currentQuiz.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700 border border-white/10 text-white font-medium transition flex items-center justify-between group';
+                btn.innerHTML = `
+                    <span>${option}</span>
+                    <i class="fa-regular fa-circle text-slate-500 group-hover:text-cyan-400"></i>
+                `;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, selectedBtn) {
+            const currentQuiz = quizData[currentQuestionIndex];
+            const optionsBtns = document.getElementById('quiz-options').children;
+            const feedback = document.getElementById('quiz-feedback');
+
+            // Nonaktifkan semua tombol setelah menjawab
+            for (let btn of optionsBtns) {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed');
+            }
+
+            if (selectedIndex === currentQuiz.answer) {
+                score += 20;
+                document.getElementById('quiz-score').innerText = `Skor: ${score}`;
+                selectedBtn.classList.remove('bg-slate-800/80');
+                selectedBtn.classList.add('bg-emerald-600/80', 'border-emerald-400');
+                
+                feedback.className = 'p-4 rounded-2xl font-bold text-center text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 block';
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check"></i> Jawaban Hebat! Kamu Benar (+20 Skor)';
+                
+                // Efek kembang api mini
+                confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
+            } else {
+                selectedBtn.classList.remove('bg-slate-800/80');
+                selectedBtn.classList.add('bg-rose-600/80', 'border-rose-400');
+                
+                // Tunjukkan jawaban yang benar
+                optionsBtns[currentQuiz.answer].classList.remove('bg-slate-800/80');
+                optionsBtns[currentQuiz.answer].classList.add('bg-emerald-600/50');
+
+                feedback.className = 'p-4 rounded-2xl font-bold text-center text-rose-300 bg-rose-950/60 border border-rose-500/40 block';
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Kurang Tepat! Tetap Semangat Ya!';
+            }
+
+            document.getElementById('btn-next-quiz').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-box').classList.add('hidden');
+            document.getElementById('quiz-result').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+
+            const badgeTitle = document.getElementById('badge-title');
+            if (score >= 80) {
+                badgeTitle.innerText = "🏆 Master Detektif AI Super!";
+                confetti({ particleCount: 120, spread: 100, origin: { y: 0.5 } });
+            } else if (score >= 60) {
+                badgeTitle.innerText = "⭐ Pejuang Koding Hebat!";
+            } else {
+                badgeTitle.innerText = "🌱 Pemula Berbakat (Ayo Coba Lagi!)";
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('quiz-score').innerText = `Skor: 0`;
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-box').classList.remove('hidden');
+            loadQuestion();
+        }
+
+
+        /* ===================================================
+           3. LOGIKA PERMAINAN DRAG AND DROP LAB AI
+           =================================================== */
+        let totalItems = 6;
+        let correctlySorted = 0;
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function dragEnter(ev) {
+            ev.currentTarget.classList.add('drag-over');
+        }
+
+        function dragLeave(ev) {
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+            ev.dataTransfer.setData("category", ev.target.getAttribute("data-category"));
+        }
+
+        function drop(ev, targetCategory) {
+            ev.preventDefault();
+            const dropZone = ev.currentTarget;
+            dropZone.classList.remove('drag-over');
+
+            const itemId = ev.dataTransfer.getData("text");
+            const itemCategory = ev.dataTransfer.getData("category");
+            const draggedElement = document.getElementById(itemId);
+
+            if (!draggedElement) return;
+
+            const statusText = document.getElementById('game-status');
+
+            if (itemCategory === targetCategory) {
+                // Berhasil disortir dengan benar
+                const container = dropZone.querySelector('.dropped-container');
+                container.appendChild(draggedElement);
+                
+                draggedElement.setAttribute('draggable', 'false');
+                draggedElement.classList.remove('draggable-item');
+                draggedElement.classList.add('opacity-90', 'scale-95');
+
+                correctlySorted++;
+                statusText.innerHTML = `✅ <span class="text-emerald-400">AI Berhasil Identifikasi!</span> Objek sesuai kategori (${correctlySorted}/${totalItems})`;
+
+                if (correctlySorted === totalItems) {
+                    statusText.innerHTML = `🎉 <span class="text-neon-yellow">Luar Biasa! AI Telah Terlatih Sempurna!</span>`;
+                    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+                }
+            } else {
+                // Salah Kategori
+                statusText.innerHTML = `❌ <span class="text-rose-400">AI Bingung!</span> Objek tidak cocok dengan kategori tempat ini.`;
+            }
+        }
+
+        function resetDragGame() {
+            correctlySorted = 0;
+            const itemsPool = document.getElementById('items-pool');
+            const items = [
+                { id: 'item-1', cat: 'organik', icon: 'fa-apple-whole', name: 'Sisa Apel', color: 'emerald' },
+                { id: 'item-2', cat: 'anorganik', icon: 'fa-bottle-water', name: 'Botol Plastik', color: 'blue' },
+                { id: 'item-3', cat: 'organik', icon: 'fa-leaf', name: 'Daun Kering', color: 'emerald' },
+                { id: 'item-4', cat: 'anorganik', icon: 'fa-box', name: 'Kaleng Minuman', color: 'blue' },
+                { id: 'item-5', cat: 'organik', icon: 'fa-fish', name: 'Duri Ikan', color: 'emerald' },
+                { id: 'item-6', cat: 'anorganik', icon: 'fa-plug', name: 'Kabel Bekas', color: 'blue' },
+            ];
+
+            // Clear containers
+            document.querySelectorAll('.dropped-container').forEach(c => c.innerHTML = '');
+            itemsPool.innerHTML = '';
+
+            // Rebuild Items
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.draggable = true;
+                el.ondragstart = drag;
+                el.id = item.id;
+                el.setAttribute('data-category', item.cat);
+                el.className = `draggable-item bg-${item.color}-600/30 border border-${item.color}-400/50 hover:bg-${item.color}-600/50 text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-3 transition`;
+                el.innerHTML = `<i class="fa-solid ${item.icon} text-${item.color}-400 text-2xl"></i> ${item.name}`;
+                itemsPool.appendChild(el);
+            });
+
+            document.getElementById('game-status').innerText = '🤖 AI Sensor Status: Menunggu klasifikasi data...';
+        }
+
+
+        /* ===================================================
+           4. INISIALISASI SAAT HALAMAN DIMUAT
+           =================================================== */
+        window.onload = function() {
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>
